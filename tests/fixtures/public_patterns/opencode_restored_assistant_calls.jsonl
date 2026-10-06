@@ -1,0 +1,2 @@
+{"role":"assistant","content":"Synthetic lookup.","tool_calls":[{"id":"case-orphan","type":"function","function":{"name":"synthetic_lookup","arguments":"{}"}}]}
+{"role":"tool","tool_call_id":"case-orphan","content":"Synthetic result."}

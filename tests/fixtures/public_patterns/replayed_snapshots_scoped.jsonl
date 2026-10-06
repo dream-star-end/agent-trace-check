@@ -1,0 +1,4 @@
+{"role":"assistant","content":"Synthetic lookup.","tool_calls":[{"id":"case-a","type":"function","function":{"name":"synthetic_lookup","arguments":"{}"}}],"trace_id":"request-one"}
+{"role":"tool","tool_call_id":"case-a","content":"Synthetic result.","trace_id":"request-one"}
+{"role":"assistant","content":"Synthetic lookup.","tool_calls":[{"id":"case-a","type":"function","function":{"name":"synthetic_lookup","arguments":"{}"}}],"trace_id":"request-two"}
+{"role":"tool","tool_call_id":"case-a","content":"Synthetic result.","trace_id":"request-two"}

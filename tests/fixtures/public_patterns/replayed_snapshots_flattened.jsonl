@@ -1,0 +1,4 @@
+{"role":"assistant","content":"Synthetic lookup.","tool_calls":[{"id":"case-a","type":"function","function":{"name":"synthetic_lookup","arguments":"{}"}}]}
+{"role":"tool","tool_call_id":"case-a","content":"Synthetic result."}
+{"role":"assistant","content":"Synthetic lookup.","tool_calls":[{"id":"case-a","type":"function","function":{"name":"synthetic_lookup","arguments":"{}"}}]}
+{"role":"tool","tool_call_id":"case-a","content":"Synthetic result."}
