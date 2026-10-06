@@ -1,0 +1,5 @@
+{"role":"user","content":"Synthetic example: get weather and time."}
+{"role":"assistant","content":null,"tool_calls":[{"id":"a","type":"function","function":{"name":"lookup_weather","arguments":"{}"}},{"id":"b","type":"function","function":{"name":"lookup_time","arguments":"{}"}}]}
+{"role":"tool","tool_call_id":"b","content":"12:00"}
+{"role":"tool","tool_call_id":"a","content":"sunny"}
+{"role":"assistant","content":"Synthetic result."}
