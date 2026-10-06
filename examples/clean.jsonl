@@ -1,0 +1,5 @@
+{"type":"tool_call","trace_id":"demo","call_id":"a","name":"lookup_weather"}
+{"type":"tool_call","trace_id":"demo","call_id":"b","name":"lookup_time"}
+{"type":"tool_result","trace_id":"demo","call_id":"b"}
+{"type":"tool_result","trace_id":"demo","call_id":"a"}
+{"type":"trace_end","trace_id":"demo","status":"completed"}
