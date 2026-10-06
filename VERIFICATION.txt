@@ -1,0 +1,129 @@
+Verification on 2026-10-06 UTC
+Python: 3.12.14
+Synthetic inputs only. No network or model calls in the checked program.
+CI matrix is configured but has not yet run for this source snapshot.
+
+$ python3 -m agent_trace_check examples/clean.jsonl
+CLEAN: 2 calls, 2 matched results; 0 findings, 0 input errors, 0 pending calls
+
+Exit: 0
+
+$ python3 -m agent_trace_check examples/broken.jsonl
+FINDINGS: 2 calls, 0 matched results; 4 findings, 0 input errors, 0 pending calls
+- duplicate_call_id: line 2 trace="demo" call="a" related_line=1: call ID is already used in this trace
+- orphan_result: line 3 trace="demo" call="unknown": result has no preceding call in this trace
+- interrupted_trace: line 4 trace="demo": trace explicitly ended as interrupted
+- missing_result: line 1 trace="demo" call="a" related_line=4: trace ended before the call received a result
+
+Exit: 1
+
+$ python3 -m agent_trace_check examples/incomplete.jsonl --allow-incomplete
+INCOMPLETE: 2 calls, 1 matched results; 0 findings, 0 input errors, 1 pending calls
+- pending_call: line 1 trace="demo" call="a": call is pending at end of snapshot
+Pending calls are allowed only because --allow-incomplete was set.
+
+Exit: 0
+
+$ python3 -m agent_trace_check examples/chat-messages.jsonl --format chat-messages
+CLEAN: 2 calls, 2 matched results; 0 findings, 0 input errors, 0 pending calls
+
+Exit: 0
+
+$ python3 -m unittest discover -s tests -v
+
+test_bad_usage_exit_two (test_cli.CLITests.test_bad_usage_exit_two) ... ok
+test_chat_example (test_cli.CLITests.test_chat_example) ... ok
+test_clean_example (test_cli.CLITests.test_clean_example) ... ok
+test_closed_stdout_pipe_exits_without_traceback (test_cli.CLITests.test_closed_stdout_pipe_exits_without_traceback) ... ok
+test_directory_is_input_error (test_cli.CLITests.test_directory_is_input_error) ... ok
+test_findings_example (test_cli.CLITests.test_findings_example) ... ok
+test_incomplete_example (test_cli.CLITests.test_incomplete_example) ... ok
+test_invalid_json_exit_two (test_cli.CLITests.test_invalid_json_exit_two) ... ok
+test_invalid_utf8_file (test_cli.CLITests.test_invalid_utf8_file) ... ok
+test_invalid_utf8_stdin (test_cli.CLITests.test_invalid_utf8_stdin) ... ok
+test_missing_file_exit_two (test_cli.CLITests.test_missing_file_exit_two) ... ok
+test_stdin (test_cli.CLITests.test_stdin) ... ok
+test_stdin_unicode (test_cli.CLITests.test_stdin_unicode) ... ok
+test_version (test_cli.CLITests.test_version) ... ok
+test_arguments_not_parsed_or_executed (test_core.ChatMessageTests.test_arguments_not_parsed_or_executed) ... ok
+test_bad_call_shapes (test_core.ChatMessageTests.test_bad_call_shapes) ... ok
+test_bad_tool_content_rejected (test_core.ChatMessageTests.test_bad_tool_content_rejected) ... ok
+test_complete_chat_message_pair (test_core.ChatMessageTests.test_complete_chat_message_pair) ... ok
+test_context_messages_ignored (test_core.ChatMessageTests.test_context_messages_ignored) ... ok
+test_empty_result_content_is_valid (test_core.ChatMessageTests.test_empty_result_content_is_valid) ... ok
+test_legacy_function_call_is_error (test_core.ChatMessageTests.test_legacy_function_call_is_error) ... ok
+test_legacy_function_role_is_error (test_core.ChatMessageTests.test_legacy_function_role_is_error) ... ok
+test_malformed_batch_is_atomic (test_core.ChatMessageTests.test_malformed_batch_is_atomic) ... ok
+test_nonassistant_tool_calls_rejected (test_core.ChatMessageTests.test_nonassistant_tool_calls_rejected) ... ok
+test_nonstring_arguments_rejected (test_core.ChatMessageTests.test_nonstring_arguments_rejected) ... ok
+test_null_calls_ignored (test_core.ChatMessageTests.test_null_calls_ignored) ... ok
+test_null_legacy_function_field_is_absent (test_core.ChatMessageTests.test_null_legacy_function_field_is_absent) ... ok
+test_parallel_calls_in_one_message (test_core.ChatMessageTests.test_parallel_calls_in_one_message) ... ok
+test_response_envelopes_and_deltas_rejected (test_core.ChatMessageTests.test_response_envelopes_and_deltas_rejected) ... ok
+test_text_content_parts (test_core.ChatMessageTests.test_text_content_parts) ... ok
+test_tool_calls_requires_list (test_core.ChatMessageTests.test_tool_calls_requires_list) ... ok
+test_tool_content_required (test_core.ChatMessageTests.test_tool_content_required) ... ok
+test_trace_extension_isolates_runs (test_core.ChatMessageTests.test_trace_extension_isolates_runs) ... ok
+test_unsupported_custom_call_is_error (test_core.ChatMessageTests.test_unsupported_custom_call_is_error) ... ok
+test_active_duplicate_id (test_core.LifecycleTests.test_active_duplicate_id) ... ok
+test_all_parallel_completion_orders (test_core.LifecycleTests.test_all_parallel_completion_orders) ... ok
+test_allow_incomplete (test_core.LifecycleTests.test_allow_incomplete) ... ok
+test_allow_incomplete_does_not_hide_other_findings (test_core.LifecycleTests.test_allow_incomplete_does_not_hide_other_findings) ... ok
+test_clean_explicit_end (test_core.LifecycleTests.test_clean_explicit_end) ... ok
+test_clean_single_call (test_core.LifecycleTests.test_clean_single_call) ... ok
+test_duplicate_end (test_core.LifecycleTests.test_duplicate_end) ... ok
+test_duplicate_result (test_core.LifecycleTests.test_duplicate_result) ... ok
+test_ending_one_trace_does_not_close_another (test_core.LifecycleTests.test_ending_one_trace_does_not_close_another) ... ok
+test_event_after_end (test_core.LifecycleTests.test_event_after_end) ... ok
+test_explicit_end_still_requires_results (test_core.LifecycleTests.test_explicit_end_still_requires_results) ... ok
+test_interleaved_traces_isolate_ids (test_core.LifecycleTests.test_interleaved_traces_isolate_ids) ... ok
+test_interruption_is_explicit (test_core.LifecycleTests.test_interruption_is_explicit) ... ok
+test_interruption_without_pending_calls (test_core.LifecycleTests.test_interruption_without_pending_calls) ... ok
+test_json_report_is_deterministic (test_core.LifecycleTests.test_json_report_is_deterministic) ... ok
+test_missing_result_at_eof (test_core.LifecycleTests.test_missing_result_at_eof) ... ok
+test_multiple_sequential_calls (test_core.LifecycleTests.test_multiple_sequential_calls) ... ok
+test_no_interruption_inference_from_eof (test_core.LifecycleTests.test_no_interruption_inference_from_eof) ... ok
+test_orphan_result (test_core.LifecycleTests.test_orphan_result) ... ok
+test_partial_parallel_completion (test_core.LifecycleTests.test_partial_parallel_completion) ... ok
+test_repeated_orphans_stay_orphans (test_core.LifecycleTests.test_repeated_orphans_stay_orphans) ... ok
+test_result_before_call_not_retroactively_matched (test_core.LifecycleTests.test_result_before_call_not_retroactively_matched) ... ok
+test_result_in_wrong_trace (test_core.LifecycleTests.test_result_in_wrong_trace) ... ok
+test_reuse_across_traces_is_valid (test_core.LifecycleTests.test_reuse_across_traces_is_valid) ... ok
+test_sequential_reuse_same_trace_is_duplicate (test_core.LifecycleTests.test_sequential_reuse_same_trace_is_duplicate) ... ok
+test_bad_end_status_is_error (test_core.ParsingTests.test_bad_end_status_is_error) ... ok
+test_blank_lines_keep_physical_line_numbers (test_core.ParsingTests.test_blank_lines_keep_physical_line_numbers) ... ok
+test_duplicate_json_keys_rejected (test_core.ParsingTests.test_duplicate_json_keys_rejected) ... ok
+test_empty_input_is_clean_zero_coverage (test_core.ParsingTests.test_empty_input_is_clean_zero_coverage) ... ok
+test_error_priority_over_findings (test_core.ParsingTests.test_error_priority_over_findings) ... ok
+test_human_diagnostics_escape_terminal_control_characters (test_core.ParsingTests.test_human_diagnostics_escape_terminal_control_characters) ... ok
+test_invalid_json_continues (test_core.ParsingTests.test_invalid_json_continues) ... ok
+test_json_nested_beyond_parser_limit (test_core.ParsingTests.test_json_nested_beyond_parser_limit) ... ok
+test_nonfinite_json_numbers_rejected_even_in_metadata (test_core.ParsingTests.test_nonfinite_json_numbers_rejected_even_in_metadata) ... ok
+test_nonobject_records_rejected (test_core.ParsingTests.test_nonobject_records_rejected) ... ok
+test_payload_not_in_diagnostics (test_core.ParsingTests.test_payload_not_in_diagnostics) ... ok
+test_required_strings_rejected (test_core.ParsingTests.test_required_strings_rejected) ... ok
+test_unknown_event_type_is_error (test_core.ParsingTests.test_unknown_event_type_is_error) ... ok
+test_unknown_format_rejected (test_core.ParsingTests.test_unknown_format_rejected) ... ok
+test_unknown_metadata_allowed (test_core.ParsingTests.test_unknown_metadata_allowed) ... ok
+test_allow_incomplete_does_not_hide_duplicates (test_public_patterns.PublicPatternTests.test_allow_incomplete_does_not_hide_duplicates) ... ok
+test_allow_incomplete_does_not_hide_orphans (test_public_patterns.PublicPatternTests.test_allow_incomplete_does_not_hide_orphans) ... ok
+test_cherry_deduplicated_control_clean (test_public_patterns.PublicPatternTests.test_cherry_deduplicated_control_clean) ... ok
+test_cherry_distinct_parallel_ids_no_false_positive (test_public_patterns.PublicPatternTests.test_cherry_distinct_parallel_ids_no_false_positive) ... ok
+test_cherry_duplicate_call_and_result_shape (test_public_patterns.PublicPatternTests.test_cherry_duplicate_call_and_result_shape) ... ok
+test_flattened_replayed_requests_are_not_an_event_stream (test_public_patterns.PublicPatternTests.test_flattened_replayed_requests_are_not_an_event_stream) ... ok
+test_json_cli_matches_pattern_expectations (test_public_patterns.PublicPatternTests.test_json_cli_matches_pattern_expectations) ... ok
+test_opencode_assistant_calls_missing_but_result_retained (test_public_patterns.PublicPatternTests.test_opencode_assistant_calls_missing_but_result_retained) ... ok
+test_opencode_restored_calls_control_clean (test_public_patterns.PublicPatternTests.test_opencode_restored_calls_control_clean) ... ok
+test_pending_parallel_call_is_allowed_for_snapshot (test_public_patterns.PublicPatternTests.test_pending_parallel_call_is_allowed_for_snapshot) ... ok
+test_per_request_scope_avoids_replay_false_positive (test_public_patterns.PublicPatternTests.test_per_request_scope_avoids_replay_false_positive) ... ok
+test_same_snapshot_requires_result_when_assumed_complete (test_public_patterns.PublicPatternTests.test_same_snapshot_requires_result_when_assumed_complete) ... ok
+
+----------------------------------------------------------------------
+Ran 86 tests in 0.782s
+
+OK
+Exit: 0
+
+$ python3 -m compileall -q agent_trace_check tests
+
+Exit: 0
