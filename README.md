@@ -170,6 +170,12 @@ This input mode does not accept whole `messages` arrays, response envelopes,
 messages as JSONL yourself, or map your logger to the normalized schema.
 There is no automatic format detection and no provider SDK dependency.
 
+Have a saved request body with a `messages` array? See
+[Check a captured Chat Completions request](docs/captured-request.md) for a
+standard-library JSON-to-JSONL export recipe, synthetic failing/repaired request
+shapes, and capture/privacy boundaries. Streaming responses still require the
+complete outbound request snapshot, not SSE output.
+
 If your logger saves the full conversation history for every request, check each
 request snapshot separately. Concatenating repeated histories under one trace
 can produce misleading duplicate findings. Alternatively, give each snapshot a
@@ -219,7 +225,7 @@ python3 -m unittest discover -s tests -v
 python3 -m compileall -q agent_trace_check tests
 ```
 
-The local verification passes 102 tests on Python 3.12. CI is configured
+The local verification passes 128 tests on Python 3.12. CI is configured
 to exercise Python 3.10–3.14 on Linux, plus Python 3.12 on Windows and macOS.
 A configured matrix is not proof of a passing run; check the actual workflow
 results for the commit you use.
@@ -301,6 +307,6 @@ assistant 的 function `tool_calls` 和 tool 消息的 `tool_call_id`。它不�
 隐私信息。原型没有输入大小限制，请使用可信、有限大小的日志导出。
 
 项目处于早期阶段，采用 MIT 许可证，目前没有软件包注册表发行版。初始代码、测试
-和文档由 AI 辅助开发，102 项测试在本地 Python 3.12 上通过，尚未验证生产环境中的
+和文档由 AI 辅助开发，128 项测试在本地 Python 3.12 上通过，尚未验证生产环境中的
 实际效果。欢迎提供最小合成样例、脱敏日志的验证反馈和小范围改进。贡献前请阅读
 [CONTRIBUTING.md](CONTRIBUTING.md)，分享日志或报告前请移除敏感信息。
