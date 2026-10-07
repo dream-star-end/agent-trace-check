@@ -13,6 +13,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from agent_trace_check.core import check_lines
 
@@ -104,11 +105,16 @@ class RequestConversionTests(unittest.TestCase):
         with self.assertRaisesRegex(example.RequestError, "supported limits"):
             example.request_to_jsonl('{"messages": [{"role": "user", "metadata": 1e400}]}')
 
-    def test_deep_nesting_is_payload_free_error(self):
-        with self.assertRaisesRegex(example.RequestError, "supported limits"):
-            example.request_to_jsonl('{"messages": [{"role": "user", "metadata": '
-                                     + '[' * 10000 + '"private-sentinel"'
-                                     + ']' * 10000 + '}]}')
+    def test_parser_recursion_errors_are_payload_free(self):
+        # Tolerated nesting depth differs between Python versions. Exercise the
+        # error contract for both parsing and serialization without a fixed cap.
+        for operation in ("loads", "dumps"):
+            with self.subTest(operation=operation), patch.object(
+                    example.json, operation, side_effect=RecursionError("private-sentinel")):
+                with self.assertRaisesRegex(example.RequestError, "supported limits") as raised:
+                    example.request_to_jsonl('{"messages": [{"role": "user", '
+                                             '"content": "private-sentinel"}]}')
+                self.assertNotIn("private-sentinel", str(raised.exception))
 
     def test_malformed_json_errors_do_not_include_payload(self):
         for text in ('{"private-sentinel": ]}', '', '\ufeff{"messages": []}'):
