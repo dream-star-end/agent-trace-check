@@ -36,8 +36,45 @@ Exit codes:
   can include pending calls; the report says `incomplete`, never `clean`.
 - `1`: one or more lifecycle findings.
 - `2`: malformed/unsupported input, unreadable/non-UTF-8 input, command-line
-  usage error, or broken output pipe. Input errors take priority over findings.
+  usage error, no captured calls when `--require-calls` is set, or broken output
+  pipe. Input errors take priority over findings.
   Argument usage errors are printed to stderr, even with `--json`.
+
+## Use as a CI check
+
+When your test scenario is supposed to invoke a tool, add `--require-calls` so
+an empty export or a chat history containing only conversation text cannot
+silently pass:
+
+```sh
+python3 -m agent_trace_check /path/to/captured-run.jsonl --require-calls --json
+```
+
+Run from the checker checkout after your harness finishes writing the UTF-8
+JSONL file. Use `--format chat-messages` for complete Chat Completions messages.
+Let the command's nonzero exit code fail the CI step; do not append `|| true`
+or enable `continue-on-error`. The JSON report is still printed on failure.
+Do not overwrite the input file by redirecting the report to the same path.
+
+For example, if CI has already checked out a reviewed revision of this checker
+at `tools/agent-trace-check` and the harness wrote `artifacts/run.jsonl`, add this
+GitHub Actions step:
+
+```yaml
+- name: Check captured tool trace
+  working-directory: tools/agent-trace-check
+  run: python -m agent_trace_check "${{ github.workspace }}/artifacts/run.jsonl" --require-calls --json
+```
+
+The guard produces the input error `no_tool_calls` and exit code `2` when
+`summary.calls` is zero. It requires at least one valid call processed before
+its trace's terminal boundary across the **whole input**, not one per trace.
+Calls in rejected records or after `trace_end` do not count. A pending call
+counts, so combining this flag with `--allow-incomplete` still permits an
+incomplete snapshot. Omit `--allow-incomplete` when CI requires every call to
+have a result. The guard cannot detect a partially captured run, a stale file,
+or an entirely missing trace within a multi-trace export. Leave the guard off
+for scenarios where zero tool calls are expected.
 
 ## What a failure looks like
 
@@ -158,7 +195,8 @@ including duplicates. `matched_results` counts accepted matches only.
 Events after a terminal boundary are reported but not processed as calls or
 results. `traces` counts traces with lifecycle events; ignored chat messages do
 not create traces. Empty input or input containing only ignored messages is
-`clean` with zero calls, which does not establish that a workload was captured.
+`clean` with zero calls by default, which does not establish that a workload was
+captured. `--require-calls` makes zero-call input `invalid` instead.
 
 Arguments and result bodies are omitted from reports. Identifiers are included
 and could contain private data; review/redact reports before sharing them.
@@ -181,7 +219,7 @@ python3 -m unittest discover -s tests -v
 python3 -m compileall -q agent_trace_check tests
 ```
 
-The local verification passes 86 tests on Python 3.12. CI is configured
+The local verification passes 102 tests on Python 3.12. CI is configured
 to exercise Python 3.10–3.14 on Linux, plus Python 3.12 on Windows and macOS.
 A configured matrix is not proof of a passing run; check the actual workflow
 results for the commit you use.
@@ -252,10 +290,17 @@ assistant 的 function `tool_calls` 和 tool 消息的 `tool_call_id`。它不�
 1 表示生命周期问题，2 表示输入/格式/用法/读取错误或输出管道已关闭。若出现格式错误，该条记录整体
 跳过，继续检查；总体报告仍为 `invalid`。空文件会显示零调用，不能证明任务执行正确。
 
+如果 CI 场景预期会调用工具，请加上 `--require-calls`：没有可检查的工具调用时，
+报告 `no_tool_calls`，状态为 `invalid`，退出码为 2，避免空日志或纯文本对话让 CI
+误判通过。检查范围是整份输入，并非每个 trace；已跳过的无效记录和 `trace_end`
+之后的调用不计入。与 `--allow-incomplete` 同用时，尚未返回结果的调用仍满足此要求。
+需要完整结果的 CI 不应加 `--allow-incomplete`。此选项不会发现部分缺失、旧日志或
+多 trace 导出中整段缺失的 trace，预期无工具调用的场景应保持关闭。
+
 报告不包含参数和结果正文，但会包含 trace 和 call ID；分享前请检查其中是否有
 隐私信息。原型没有输入大小限制，请使用可信、有限大小的日志导出。
 
 项目处于早期阶段，采用 MIT 许可证，目前没有软件包注册表发行版。初始代码、测试
-和文档由 AI 辅助开发，86 项测试在本地 Python 3.12 上通过，尚未验证生产环境中的
+和文档由 AI 辅助开发，102 项测试在本地 Python 3.12 上通过，尚未验证生产环境中的
 实际效果。欢迎提供最小合成样例、脱敏日志的验证反馈和小范围改进。贡献前请阅读
 [CONTRIBUTING.md](CONTRIBUTING.md)，分享日志或报告前请移除敏感信息。

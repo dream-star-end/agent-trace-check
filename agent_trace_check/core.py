@@ -171,11 +171,12 @@ class Trace:
 
 
 def check_lines(lines: Iterable[str], *, input_format: str = "normalized",
-                allow_incomplete: bool = False) -> Report:
+                allow_incomplete: bool = False, require_calls: bool = False) -> Report:
     """Check a finite snapshot in file order. Blank lines are ignored.
 
     A malformed record is skipped atomically. Continue collecting diagnostics,
     but status 'invalid' and exit code 2 always take precedence.
+    With require_calls, input without a processed tool call is also invalid.
     """
     if input_format not in FORMATS:
         raise ValueError("unsupported input format")
@@ -246,4 +247,7 @@ def check_lines(lines: Iterable[str], *, input_format: str = "normalized",
                 "call is pending at end of snapshot" if allow_incomplete
                 else "no result before end of input", call.line, call.trace_id, call.call_id)
             (report.pending if allow_incomplete else report.findings).append(diagnostic)
+    if require_calls and report.calls == 0:
+        report.errors.append(Diagnostic(
+            "no_tool_calls", "input contains no tool calls to check (--require-calls)"))
     return report

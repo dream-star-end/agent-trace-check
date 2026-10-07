@@ -1,31 +1,68 @@
 Verification on 2026-10-06 UTC
-Python: 3.12.14
-Synthetic inputs only. No network or model calls in the checked program.
-CI matrix is configured but has not yet run for this source snapshot.
+Local candidate: opt-in --require-calls CI guard
+Python: 3.12.14 / Linux
+Synthetic inputs only. No dependencies, model calls, or network calls in the checker.
+Not published. Remote CI has not run for this candidate.
+The supplied source mirror has no .git directory; this change is isolated from it.
 
-$ python3 -m agent_trace_check examples/clean.jsonl
+Compatibility: 24 exact comparisons against the supplied source mirror passed.
+Compared JSON stdout, stderr, and exit code for all 4 examples and 8 public-pattern
+fixtures, each with default and --allow-incomplete behavior.
+
+CI-style smoke checks using an absolute input path containing spaces passed:
+  complete capture -> exit 0; empty capture -> exit 2;
+  broken lifecycle -> exit 1; malformed export -> exit 2.
+
+Exit-code contract: unmet --require-calls is a structured input-validation error
+(status invalid, errors[].code no_tool_calls, exit 2, report on stdout).
+It is not argparse misuse, which remains exit 2 with usage text on stderr.
+JSON report version and shape are unchanged; this adds one opt-in diagnostic code.
+
+$ python3 -m agent_trace_check - --require-calls --json
+{
+  "report_version": 1,
+  "status": "invalid",
+  "exit_code": 2,
+  "summary": {
+    "records": 0,
+    "events": 0,
+    "ignored_messages": 0,
+    "traces": 0,
+    "calls": 0,
+    "results": 0,
+    "matched_results": 0,
+    "findings": 0,
+    "errors": 1,
+    "pending": 0
+  },
+  "findings": [],
+  "errors": [
+    {
+      "code": "no_tool_calls",
+      "message": "input contains no tool calls to check (--require-calls)",
+      "line": null,
+      "trace_id": null,
+      "call_id": null,
+      "related_line": null
+    }
+  ],
+  "pending": []
+}
+
+
+Exit: 2
+
+$ python3 -m agent_trace_check examples/clean.jsonl --require-calls
 CLEAN: 2 calls, 2 matched results; 0 findings, 0 input errors, 0 pending calls
+
 
 Exit: 0
 
-$ python3 -m agent_trace_check examples/broken.jsonl
-FINDINGS: 2 calls, 0 matched results; 4 findings, 0 input errors, 0 pending calls
-- duplicate_call_id: line 2 trace="demo" call="a" related_line=1: call ID is already used in this trace
-- orphan_result: line 3 trace="demo" call="unknown": result has no preceding call in this trace
-- interrupted_trace: line 4 trace="demo": trace explicitly ended as interrupted
-- missing_result: line 1 trace="demo" call="a" related_line=4: trace ended before the call received a result
-
-Exit: 1
-
-$ python3 -m agent_trace_check examples/incomplete.jsonl --allow-incomplete
+$ python3 -m agent_trace_check examples/incomplete.jsonl --require-calls --allow-incomplete
 INCOMPLETE: 2 calls, 1 matched results; 0 findings, 0 input errors, 1 pending calls
 - pending_call: line 1 trace="demo" call="a": call is pending at end of snapshot
 Pending calls are allowed only because --allow-incomplete was set.
 
-Exit: 0
-
-$ python3 -m agent_trace_check examples/chat-messages.jsonl --format chat-messages
-CLEAN: 2 calls, 2 matched results; 0 findings, 0 input errors, 0 pending calls
 
 Exit: 0
 
@@ -117,13 +154,31 @@ test_opencode_restored_calls_control_clean (test_public_patterns.PublicPatternTe
 test_pending_parallel_call_is_allowed_for_snapshot (test_public_patterns.PublicPatternTests.test_pending_parallel_call_is_allowed_for_snapshot) ... ok
 test_per_request_scope_avoids_replay_false_positive (test_public_patterns.PublicPatternTests.test_per_request_scope_avoids_replay_false_positive) ... ok
 test_same_snapshot_requires_result_when_assumed_complete (test_public_patterns.PublicPatternTests.test_same_snapshot_requires_result_when_assumed_complete) ... ok
+test_call_after_trace_end_does_not_satisfy_requirement (test_require_calls.RequireCallsTests.test_call_after_trace_end_does_not_satisfy_requirement) ... ok
+test_chat_call_pair_satisfies_requirement (test_require_calls.RequireCallsTests.test_chat_call_pair_satisfies_requirement) ... ok
+test_cli_allow_incomplete_does_not_allow_empty_input (test_require_calls.RequireCallsTests.test_cli_allow_incomplete_does_not_allow_empty_input) ... ok
+test_cli_clean_file_passes (test_require_calls.RequireCallsTests.test_cli_clean_file_passes) ... ok
+test_cli_empty_stdin_human_error (test_require_calls.RequireCallsTests.test_cli_empty_stdin_human_error) ... ok
+test_cli_empty_stdin_json_error (test_require_calls.RequireCallsTests.test_cli_empty_stdin_json_error) ... ok
+test_cli_ignored_chat_stdin_fails (test_require_calls.RequireCallsTests.test_cli_ignored_chat_stdin_fails) ... ok
+test_empty_or_blank_input_fails_only_when_required (test_require_calls.RequireCallsTests.test_empty_or_blank_input_fails_only_when_required) ... ok
+test_guard_does_not_hide_missing_result (test_require_calls.RequireCallsTests.test_guard_does_not_hide_missing_result) ... ok
+test_ignored_chat_messages_do_not_satisfy_requirement (test_require_calls.RequireCallsTests.test_ignored_chat_messages_do_not_satisfy_requirement) ... ok
+test_malformed_batch_does_not_satisfy_requirement (test_require_calls.RequireCallsTests.test_malformed_batch_does_not_satisfy_requirement) ... ok
+test_normalized_call_pair_satisfies_requirement (test_require_calls.RequireCallsTests.test_normalized_call_pair_satisfies_requirement) ... ok
+test_orphan_result_does_not_satisfy_requirement (test_require_calls.RequireCallsTests.test_orphan_result_does_not_satisfy_requirement) ... ok
+test_pending_call_satisfies_requirement (test_require_calls.RequireCallsTests.test_pending_call_satisfies_requirement) ... ok
+test_requirement_is_whole_input_not_per_trace (test_require_calls.RequireCallsTests.test_requirement_is_whole_input_not_per_trace) ... ok
+test_trace_end_is_not_tool_coverage (test_require_calls.RequireCallsTests.test_trace_end_is_not_tool_coverage) ... ok
 
 ----------------------------------------------------------------------
-Ran 86 tests in 0.782s
+Ran 102 tests in 0.924s
 
 OK
+
 Exit: 0
 
 $ python3 -m compileall -q agent_trace_check tests
+
 
 Exit: 0

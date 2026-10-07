@@ -42,6 +42,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--json", action="store_true", help="machine-readable report to stdout")
     parser.add_argument("--allow-incomplete", action="store_true",
                         help="treat unmatched calls at EOF as pending, not missing")
+    parser.add_argument("--require-calls", action="store_true",
+                        help="fail with exit code 2 if no tool calls were captured")
     parser.add_argument("--version", action="version", version=f"agent-trace-check {__version__}")
     args = parser.parse_args(argv)
     try:
@@ -50,11 +52,13 @@ def main(argv: list[str] | None = None) -> int:
             import io
             stream = io.TextIOWrapper(sys.stdin.buffer, encoding="utf-8", errors="strict")
             report = check_lines(stream, input_format=args.format,
-                                 allow_incomplete=args.allow_incomplete)
+                                 allow_incomplete=args.allow_incomplete,
+                                 require_calls=args.require_calls)
         else:
             with open(args.input, encoding="utf-8", errors="strict") as stream:
                 report = check_lines(stream, input_format=args.format,
-                                     allow_incomplete=args.allow_incomplete)
+                                     allow_incomplete=args.allow_incomplete,
+                                     require_calls=args.require_calls)
     except UnicodeError:
         report = Report(errors=[Diagnostic("input_error", "input is not valid UTF-8")])
     except OSError:
