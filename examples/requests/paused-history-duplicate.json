@@ -1,0 +1,47 @@
+{
+  "model": "synthetic-model",
+  "stream": true,
+  "messages": [
+    {
+      "role": "user",
+      "content": "Look up the approved sample."
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "paused-a",
+          "type": "function",
+          "function": {
+            "name": "lookup_sample",
+            "arguments": "{\"label\": \"approved\"}"
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "Look up the approved sample."
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "paused-a",
+          "type": "function",
+          "function": {
+            "name": "lookup_sample",
+            "arguments": "{\"label\": \"approved\"}"
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "paused-a",
+      "content": "Synthetic approved sample result."
+    }
+  ]
+}

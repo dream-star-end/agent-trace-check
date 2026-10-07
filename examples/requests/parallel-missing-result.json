@@ -1,0 +1,41 @@
+{
+  "model": "synthetic-model",
+  "stream": true,
+  "messages": [
+    {
+      "role": "user",
+      "content": "Look up sample A and sample B."
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "parallel-a",
+          "type": "function",
+          "function": {
+            "name": "lookup_sample",
+            "arguments": "{\"label\": \"A\"}"
+          }
+        },
+        {
+          "id": "parallel-b",
+          "type": "function",
+          "function": {
+            "name": "lookup_sample",
+            "arguments": "{\"label\": \"B\"}"
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "parallel-a",
+      "content": "Synthetic sample A result."
+    },
+    {
+      "role": "user",
+      "content": "Summarize the samples."
+    }
+  ]
+}
