@@ -1,0 +1,71 @@
+Captured request recipe validation, 2026-10-07 UTC
+Python: 3.12.14 on Linux (POSIX)
+Merged baseline: https://github.com/dream-star-end/agent-trace-check/commit/b8579c5e4fe78e52e44e8b91f3d4fbcab73564c3
+All 28 baseline file contents were verified against the published Git blob hashes.
+Core checker, CLI, 16 guard tests, workflow, and all other baseline files except README are unchanged.
+The privacy-fixed converter, 26 recipe tests, and four request fixtures are unchanged from their reviewed version.
+Local synthetic data only; no upstream runtime or provider API exercised.
+This combined recipe has not been published or run through remote CI.
+
+$ python3 examples/request_to_jsonl.py examples/requests/parallel-missing-result.json parallel-missing-result.jsonl && python3 -m agent_trace_check parallel-missing-result.jsonl --format chat-messages
+FINDINGS: 2 calls, 1 matched results; 1 findings, 0 input errors, 0 pending calls
+- missing_result: line 2 trace="default" call="parallel-b": no result before end of input
+Exit: 1
+
+$ python3 examples/request_to_jsonl.py examples/requests/parallel-complete.json parallel-complete.jsonl && python3 -m agent_trace_check parallel-complete.jsonl --format chat-messages
+CLEAN: 2 calls, 2 matched results; 0 findings, 0 input errors, 0 pending calls
+Exit: 0
+
+$ python3 examples/request_to_jsonl.py examples/requests/paused-history-duplicate.json paused-history-duplicate.jsonl && python3 -m agent_trace_check paused-history-duplicate.jsonl --format chat-messages
+FINDINGS: 2 calls, 1 matched results; 1 findings, 0 input errors, 0 pending calls
+- duplicate_call_id: line 4 trace="default" call="paused-a" related_line=2: call ID is already used in this trace
+Exit: 1
+
+$ python3 examples/request_to_jsonl.py examples/requests/paused-history-once.json paused-history-once.jsonl && python3 -m agent_trace_check paused-history-once.jsonl --format chat-messages
+CLEAN: 1 calls, 1 matched results; 0 findings, 0 input errors, 0 pending calls
+Exit: 0
+
+All four fixture commands also produce identical stdout/stderr/exit with --require-calls.
+
+General export + optional guard command, complete: default exit 0; guard exit 0; private output mode 0600.
+General export + optional guard command, empty: default exit 0; guard exit 2; private output mode 0600.
+General export + optional guard command, text-only: default exit 0; guard exit 2; private output mode 0600.
+
+Guard compatibility: 76 exact stdout/stderr/exit comparisons with merged main passed.
+Inputs: 4 original examples, 8 public-pattern fixtures, 4 request fixture exports, empty, text-only, and malformed input.
+Each input checked by default, with --allow-incomplete, with --require-calls, and with both flags.
+
+$ python3 -m unittest discover -s tests -p test_captured_request.py -v
+
+----------------------------------------------------------------------
+Ran 26 tests in 0.705s
+
+OK
+Exit: 0
+
+$ python3 -m unittest discover -s tests -p test_require_calls.py -v
+
+----------------------------------------------------------------------
+Ran 16 tests in 0.215s
+
+OK
+Exit: 0
+
+$ python3 -m unittest discover -s tests -v
+
+----------------------------------------------------------------------
+Ran 128 tests in 1.721s
+
+OK
+Exit: 0
+
+$ python3 -m compileall -q agent_trace_check tests examples/request_to_jsonl.py
+Exit: 0
+
+POSIX permission regressions passed:
+- Private 0600 source exports to 0600 under umask 0022, 0000, and 0077.
+- Existing output contents and 0640 permissions remain unchanged on refusal.
+- Existing and dangling output symlinks are refused without touching their targets.
+- A hard-link alias to the input is refused; source contents and 0600 mode stay unchanged.
+- Creation uses O_CREAT | O_EXCL with 0600, before any payload is written.
+Windows ACL behavior was not run locally; the guide documents its separate access requirements.
